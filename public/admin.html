@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="lo">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ລະບົບຈັດການຫຼັງບ້ານ (Admin Dashboard)</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0284c7">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="apple-touch-icon" href="icon.svg">
+    <style>
+        .admin-card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .admin-card-title {
+            margin: 0 0 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-main);
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .admin-table th,
+        .admin-table td {
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--border);
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        .admin-table th {
+            background: #f8fafc;
+            color: var(--text-secondary);
+            font-weight: 700;
+        }
+
+        .btn-action {
+            border: none;
+            padding: 7px 14px;
+            border-radius: 8px;
+            font-family: 'Phetsarath OT', 'Phetsarath', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            color: #ffffff;
+            transition: opacity 0.2s;
+        }
+
+        .btn-action:hover {
+            opacity: 0.9;
+        }
+
+        .btn-blue {
+            background: var(--primary);
+        }
+
+        .btn-green {
+            background: var(--accent);
+        }
+
+        .btn-amber {
+            background: var(--amber);
+        }
+
+        .btn-red {
+            background: var(--danger);
+        }
+
+        .btn-gray {
+            background: #64748b;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- แถบด้านบน -->
+    <nav class="top-navbar">
+        <a href="index.html" class="brand-mini">
+            <div class="brand-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                </svg>
+            </div>
+            <span>ລະບົບຈັດການຂໍ້ມູນຫຼັງບ້ານ (Admin)</span>
+        </a>
+        <div class="nav-actions">
+            <a href="index.html" onclick="window.location.href='index.html'; return false;" class="btn-nav primary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+                ກັບຄືນໜ້າຫຼັກເວັບໄຊ
+            </a>
+        </div>
+    </nav>
+
+    <!-- แถบเมนูสลับส่วนจัดการ -->
+    <div class="sub-nav-bar">
+        <div class="sub-nav-inner">
+            <div class="tab-buttons">
+                <button class="tab-btn active" id="btn-tab-contents" onclick="switchAdminTab('contents')">ຈັດການຂ່າວສານ
+                    ແລະ ຊຸດຂໍ້ມູນ</button>
+                <button class="tab-btn" id="btn-tab-payments" onclick="switchAdminTab('payments')">ລາຍການແຈ້ງໂອນເງິນ
+                    (<span id="pending-count">0</span>)</button>
+                <button class="tab-btn" id="btn-tab-users" onclick="switchAdminTab('users')">ຈັດການສະມາຊິກ VIP</button>
+                <button class="tab-btn" id="btn-tab-contacts" onclick="switchAdminTab('contacts')">ໜ່ວຍງານ ແລະ
+                    ເບີໂທສຸກເສີນ</button>
+            </div>
+        </div>
+    </div>
+
+    <main class="main-container">
+
+        <!-- 1. แท็บจัดการข่าวสารและชุดข้อมูล -->
+        <div id="admin-tab-contents">
+            <div class="admin-card">
+                <h3 class="admin-card-title" id="content-form-title">ເພີ່ມຂ່າວສານ / ຊຸດຂໍ້ມູນໃໝ່ລົງເວັບໄຊ</h3>
+                <input type="hidden" id="edit-content-id" value="">
+
+                <div class="form-group">
+                    <label>ຫົວຂໍ້ຂ່າວ / ຊື່ຊຸດຂໍ້ມູນ:</label>
+                    <input type="text" id="c-title" placeholder="ປ້ອນຫົວຂໍ້ຂ່າວ ຫຼື ຊື່ຊຸດຂໍ້ມູນ...">
+
+                    <div class="form-grid">
+                        <div>
+                            <label>ໝວດໝູ່ / ປ້າຍກຳກັບ:</label>
+                            <input type="text" id="c-cat" placeholder="ຕົວຢ່າງ: ຂ່າວປະຊາສຳພັນ, ສະຖິຕິຊຸມຊົນ">
+                        </div>
+                        <div>
+                            <label>ສິດການເຂົ້າເຖິງຂໍ້ມູນ:</label>
+                            <select id="c-vip">
+                                <option value="0">ຂໍ້ມູນສາທາລະນະ (ປະຊາຊົນອ່ານຟຣີ)</option>
+                                <option value="1">ຂໍ້ມູນສຳຄັນ (ສະເພາະສະມາຊິກ VIP)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <label>ລາຍລະອຽດເນື້ອຫາ:</label>
+                    <textarea id="c-body" rows="5"
+                        placeholder="ປ້ອນລາຍລະອຽດຂ່າວສານ ຫຼື ຂໍ້ມູນທີ່ຕ້ອງການເຜີຍແຜ່..."></textarea>
+
+                    <div style="display:flex; gap:10px;">
+                        <button class="btn-action btn-blue" onclick="saveContent()" id="btn-save-content"
+                            style="padding:10px 20px; font-size:14.5px;">ບັນທຶກ ແລະ ເຜີຍແຜ່ຂໍ້ມູນ</button>
+                        <button class="btn-action btn-gray" onclick="resetContentForm()" id="btn-cancel-edit"
+                            style="display:none; padding:10px 18px; font-size:14.5px;">ຍົກເລີກການແກ້ໄຂ</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="admin-card">
+                <h3 class="admin-card-title">ລາຍການຂ່າວສານ ແລະ ຊຸດຂໍ້ມູນທັງໝົດໃນເວັບໄຊ</h3>
+                <div style="overflow-x:auto;">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th style="width:28%;">ຫົວຂໍ້</th>
+                                <th style="width:16%;">ໝວດໝູ່</th>
+                                <th style="width:16%;">ປະເພດສິດ</th>
+                                <th style="width:25%;">ເນື້ອຫາຫຍໍ້</th>
+                                <th style="width:15%;">ຈັດການ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-content-table"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. แท็บรายการแจ้งโอนเงิน -->
+        <div id="admin-tab-payments" style="display:none;">
+            <div class="admin-card">
+                <h3 class="admin-card-title">ລາຍການແຈ້ງໂອນເງິນຈາກສະມາຊິກ</h3>
+                <div style="overflow-x:auto;">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>ສະມາຊິກ</th>
+                                <th>ແພັກເກັດ</th>
+                                <th>ຈຳນວນເງິນ</th>
+                                <th>ລາຍລະອຽດການໂອນ</th>
+                                <th>ສະຖານະ</th>
+                                <th>ຈັດການ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="payment-table"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. แท็บจัดการสมาชิก VIP -->
+        <div id="admin-tab-users" style="display:none;">
+            <div class="admin-card">
+                <h3 class="admin-card-title">ລາຍຊື່ສະມາຊິກ ແລະ ມື້ນຳໃຊ້ VIP ຄົງເຫຼືອ</h3>
+                <div style="overflow-x:auto;">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>ຊື່ຜູ້ໃຊ້ (Username)</th>
+                                <th>ຊື່ ແລະ ນາມສະກຸນ</th>
+                                <th>ວັນໝົດອາຍຸ VIP</th>
+                                <th>ເພີ່ມມື້ນຳໃຊ້ດ່ວນ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="user-table"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. แท็บจัดการหน่วยงานและเบอร์โทรฉุกเฉิน -->
+        <div id="admin-tab-contacts" style="display:none;">
+            <div class="admin-card">
+                <h3 class="admin-card-title">ເພີ່ມໜ່ວຍງານ ແລະ ເບີໂທສຸກເສີນ</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>ຊື່ໜ່ວຍງານ:</label>
+                        <input type="text" id="e-agency" placeholder="ຕົວຢ່າງ: ຕຳຫຼວດຈະລາຈອນ">
+                    </div>
+                    <div class="form-group">
+                        <label>ເບີໂທລະສັບ:</label>
+                        <input type="text" id="e-phone" placeholder="ຕົວຢ່າງ: 1191">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>ໝາຍເຫດ / ເວລາໃຫ້ບໍລິການ:</label>
+                    <input type="text" id="e-note" placeholder="ຕົວຢ່າງ: ບໍລິການ 24 ຊົ່ວໂມງ">
+                </div>
+                <button class="btn-action btn-blue" onclick="addContact()"
+                    style="padding:10px 20px;">ເພີ່ມເບີໂທສຸກເສີນ</button>
+            </div>
+
+            <div class="admin-card">
+                <h3 class="admin-card-title">ລາຍຊື່ໜ່ວຍງານ ແລະ ເບີໂທສຸກເສີນທັງໝົດ</h3>
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ຊື່ໜ່ວຍງານ</th>
+                            <th>ເບີໂທ</th>
+                            <th>ໝາຍເຫດ</th>
+                            <th>ຈັດການ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-contact-table"></tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        let adminContents = [];
+
+        function switchAdminTab(tab) {
+            ['contents', 'payments', 'users', 'contacts'].forEach(t => {
+                document.getElementById('admin-tab-' + t).style.display = (t === tab) ? 'block' : 'none';
+                document.getElementById('btn-tab-' + t).classList.toggle('active', t === tab);
+            });
+        }
+
+        async function loadAdmin() {
+            const res = await fetch('/api/admin/dashboard');
+            if (res.status === 403) {
+                alert('ສະເພາະ Admin ເທົ່ານັ້ນ');
+                return window.location.href = 'index.html';
+            }
+            const data = await res.json();
+            adminContents = data.contents || [];
+
+            document.getElementById('admin-content-table').innerHTML = adminContents.map(item => `
+    <tr>
+      <td><strong>${item.title}</strong></td>
+      <td><span class="cat-badge ${item.is_vip ? 'badge-amber' : 'badge-mint'}">${item.category}</span></td>
+      <td>${item.is_vip ? '<span style="color:#d97706; font-weight:700;">ສະເພາະ VIP</span>' : '<span style="color:#0d9488; font-weight:700;">ສາທາລະນະ (ຟຣີ)</span>'}</td>
+      <td style="color:var(--text-muted);">${item.body.length > 75 ? item.body.substring(0, 75) + '...' : item.body}</td>
+      <td style="white-space:nowrap;">
+        <button class="btn-action btn-amber" onclick="editContent(${item.id})">ແກ້ໄຂ</button>
+        <button class="btn-action btn-red" onclick="deleteContent(${item.id})">ລຶບ</button>
+      </td>
+    </tr>
+  `).join('');
+
+            const pendingCount = (data.payments || []).filter(p => p.status === 'pending').length;
+            document.getElementById('pending-count').textContent = pendingCount;
+
+            document.getElementById('payment-table').innerHTML = (data.payments || []).map(p => `
+    <tr>
+      <td>${p.users.fullname} (${p.users.username})</td>
+      <td>${p.package_days} ມື້</td>
+      <td>${Number(p.amount).toLocaleString()} ກີບ</td>
+      <td>${p.transfer_note}</td>
+      <td>${p.status === 'approved' ? '<span style="color:#0d9488; font-weight:700;">ອະນຸມັດແລ້ວ</span>' : '<span style="color:#d97706; font-weight:700;">ລໍຖ້າກວດສອບ</span>'}</td>
+      <td>
+        ${p.status === 'pending'
+                    ? `<button class="btn-action btn-green" onclick="approvePayment(${p.id})">ອະນຸມັດ (+${p.package_days} ມື້)</button>`
+                    : '-'}
+      </td>
+    </tr>
+  `).join('');
+
+            document.getElementById('user-table').innerHTML = (data.users || []).map(u => {
+                const exp = u.vip_expires_at ? new Date(u.vip_expires_at).toLocaleString('lo-LA') : 'ຍັງບໍ່ມີສິດ VIP';
+                return `
+      <tr>
+        <td>${u.username}</td>
+        <td>${u.fullname}</td>
+        <td>${exp}</td>
+        <td style="white-space:nowrap;">
+          <button class="btn-action btn-blue" onclick="addDays(${u.id}, 7)">+7 ມື້</button>
+          <button class="btn-action btn-green" onclick="addDays(${u.id}, 30)">+30 ມື້</button>
+        </td>
+      </tr>
+    `;
+            }).join('');
+
+            document.getElementById('admin-contact-table').innerHTML = (data.contacts || []).map(c => `
+    <tr>
+      <td><strong>${c.agency}</strong></td>
+      <td style="color:var(--danger); font-weight:700;">${c.phone}</td>
+      <td>${c.note || '-'}</td>
+      <td><button class="btn-action btn-red" onclick="deleteContact(${c.id})">ລຶບ</button></td>
+    </tr>
+  `).join('');
+        }
+
+        async function saveContent() {
+            const id = document.getElementById('edit-content-id').value;
+            const title = document.getElementById('c-title').value.trim();
+            const category = document.getElementById('c-cat').value.trim() || 'ຂ່າວປະຊາສຳພັນ';
+            const is_vip = document.getElementById('c-vip').value === '1';
+            const body = document.getElementById('c-body').value.trim();
+
+            if (!title || !body) return alert('ກະລຸນາປ້ອນຫົວຂໍ້ ແລະ ລາຍລະອຽດເນື້ອຫາ');
+
+            const url = id ? `/api/admin/contents/${id}` : '/api/admin/contents';
+            const method = id ? 'PUT' : 'POST';
+
+            const res = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, category, is_vip, body })
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert(id ? 'ແກ້ໄຂຂໍ້ມູນສຳເລັດ!' : 'ເຜີຍແຜ່ຂໍ້ມູນໃໝ່ສຳເລັດ!');
+                resetContentForm();
+                loadAdmin();
+            } else {
+                alert('ເກີດຂໍ້ຜິດພາດ: ' + data.error);
+            }
+        }
+
+        function editContent(id) {
+            const item = adminContents.find(c => c.id === id);
+            if (!item) return;
+
+            document.getElementById('edit-content-id').value = item.id;
+            document.getElementById('c-title').value = item.title;
+            document.getElementById('c-cat').value = item.category;
+            document.getElementById('c-vip').value = item.is_vip ? '1' : '0';
+            document.getElementById('c-body').value = item.body;
+
+            document.getElementById('content-form-title').textContent = 'ແກ້ໄຂຂ່າວສານ / ຊຸດຂໍ້ມູນ (ID: ' + item.id + ')';
+            document.getElementById('btn-save-content').textContent = 'ບັນທຶກການແກ້ໄຂ';
+            document.getElementById('btn-cancel-edit').style.display = 'inline-block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function resetContentForm() {
+            document.getElementById('edit-content-id').value = '';
+            document.getElementById('c-title').value = '';
+            document.getElementById('c-cat').value = '';
+            document.getElementById('c-vip').value = '0';
+            document.getElementById('c-body').value = '';
+
+            document.getElementById('content-form-title').textContent = 'ເພີ່ມຂ່າວສານ / ຊຸດຂໍ້ມູນໃໝ່ລົງເວັບໄຊ';
+            document.getElementById('btn-save-content').textContent = 'ບັນທຶກ ແລະ ເຜີຍແຜ່ຂໍ້ມູນ';
+            document.getElementById('btn-cancel-edit').style.display = 'none';
+        }
+
+        async function deleteContent(id) {
+            if (!confirm('ຢືນຢັນການລຶບຂ່າວສານ / ຊຸດຂໍ້ມູນນີ້?')) return;
+            await fetch('/api/admin/contents/' + id, { method: 'DELETE' });
+            loadAdmin();
+        }
+
+        async function approvePayment(id) {
+            if (!confirm('ຢືນຢັນການອະນຸມັດຍອດໂອນ ແລະ ເປີດມື້ນຳໃຊ້ໃຫ້ສະມາຊິກ?')) return;
+            const res = await fetch('/api/admin/approve-payment/' + id, { method: 'POST' });
+            const data = await res.json();
+            if (data.success) {
+                alert('ເປີດນຳໃຊ້ໃຫ້ສະມາຊິກສຳເລັດ!');
+                loadAdmin();
+            }
+        }
+
+        async function addDays(user_id, days) {
+            await fetch('/api/admin/add-days', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id, days })
+            });
+            alert(`ເພີ່ມມື້ນຳໃຊ້ ${days} ມື້ສຳເລັດ`);
+            loadAdmin();
+        }
+
+        async function addContact() {
+            const agency = document.getElementById('e-agency').value.trim();
+            const phone = document.getElementById('e-phone').value.trim();
+            const note = document.getElementById('e-note').value.trim();
+            if (!agency || !phone) return alert('ກະລຸນາປ້ອນຊື່ໜ່ວຍງານ ແລະ ເບີໂທ');
+            await fetch('/api/admin/contacts', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ agency, phone, note })
+            });
+            alert('ເພີ່ມເບີໂທສຸກເສີນສຳເລັດ');
+            document.getElementById('e-agency').value = '';
+            document.getElementById('e-phone').value = '';
+            document.getElementById('e-note').value = '';
+            loadAdmin();
+        }
+
+        async function deleteContact(id) {
+            if (!confirm('ຢືນຢັນການລຶບເບີໂທສຸກເສີນນີ້?')) return;
+            await fetch('/api/admin/contacts/' + id, { method: 'DELETE' });
+            loadAdmin();
+        }
+
+        // ລົງທະບຽນ PWA Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(() => console.log('PWA Service Worker Registered'))
+                    .catch((err) => console.error('SW Error:', err));
+            });
+        }
+
+        loadAdmin();
+    </script>
+</body>
+
+</html>

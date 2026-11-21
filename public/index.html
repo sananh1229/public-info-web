@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="lo">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ລະບົບບັນຊີຂໍ້ມູນ ແລະ ບໍລິການຊຸມຊົນ</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0284c7">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="apple-touch-icon" href="icon.svg">
+</head>
+
+<body>
+
+    <!-- แถบด้านบนสุด -->
+    <nav class="top-navbar">
+        <a href="index.html" class="brand-mini">
+            <div class="brand-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+                    <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+                    <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+                </svg>
+            </div>
+            <span>ສູນຂໍ້ມູນ ແລະ ບໍລິການຊຸມຊົນ</span>
+        </a>
+
+        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+            <button id="btn-install-pwa" class="btn-nav accent" style="display:none;" onclick="installPWA()">
+                ຕິດຕັ້ງແອັບ
+            </button>
+            <div class="nav-actions" id="nav-user-area">
+                <button class="btn-nav primary" onclick="openAuthModal('login')">ເຂົ້າສູ່ລະບົບ</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ส่วนหัว Hero โทนสีขาว-ฟ้าอ่อนสบายตา -->
+    <section class="hero-section">
+        <div class="hero-container">
+            <span class="hero-badge">ຖານຂໍ້ມູນສາທາລະນະ ແລະ ບໍລິການປະຊາຊົນ</span>
+            <h1 class="hero-title">ລະບົບບັນຊີຂໍ້ມູນ ແລະ ບໍລິການຊຸມຊົນ</h1>
+            <p class="hero-subtitle">ຄົ້ນຫາຂ່າວສານສາທາລະນະ, ເບີໂທສຸກເສີນ ແລະ ຊຸດຂໍ້ມູນສຳຄັນສຳລັບສະມາຊິກ</p>
+
+            <!-- ช่องค้นหา -->
+            <div class="search-box-wrapper">
+                <input type="text" id="search-input" placeholder="ຄົ້ນຫາຊຸດຂໍ້ມູນ, ຂ່າວສານ ຫຼື ເບີໂທສຸກເສີນ..."
+                    onkeyup="handleSearch()">
+                <button onclick="handleSearch()" title="ຄົ້ນຫາ">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2.2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- แท็กหมวดหมู่ด่วน -->
+            <div class="tag-bar">
+                <span>ໝວດໝູ່ດ່ວນ:</span>
+                <span class="tag-pill active" onclick="filterByTag('ALL', this)">ທັງໝົດ</span>
+                <span class="tag-pill" onclick="filterByTag('FREE', this)">ຂໍ້ມູນສາທາລະນະ (ຟຣີ)</span>
+                <span class="tag-pill" onclick="filterByTag('VIP', this)">ຂໍ້ມູນສຳຄັນ (VIP)</span>
+                <span class="tag-pill" onclick="switchTab('agencies')">ເບີໂທສຸກເສີນ</span>
+            </div>
+
+            <!-- การ์ดสถิติ 4 ช่อง -->
+            <div class="stats-grid">
+                <div class="stat-card" onclick="switchTab('datasets')">
+                    <div class="stat-icon-wrap icon-blue">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+                            <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+                            <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+                        </svg>
+                    </div>
+                    <div class="stat-number" id="stat-contents">0</div>
+                    <div class="stat-label">ຊຸດຂໍ້ມູນທັງໝົດ</div>
+                </div>
+
+                <div class="stat-card" onclick="switchTab('agencies')">
+                    <div class="stat-icon-wrap icon-rose">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path
+                                d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z">
+                            </path>
+                        </svg>
+                    </div>
+                    <div class="stat-number" id="stat-agencies">0</div>
+                    <div class="stat-label">ໜ່ວຍງານ / ເບີສຸກເສີນ</div>
+                </div>
+
+                <div class="stat-card" onclick="filterByTag('FREE')">
+                    <div class="stat-icon-wrap icon-teal">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z">
+                            </path>
+                        </svg>
+                    </div>
+                    <div class="stat-number" id="stat-free">0</div>
+                    <div class="stat-label">ຂໍ້ມູນສາທາລະນະ (ຟຣີ)</div>
+                </div>
+
+                <div class="stat-card" onclick="openVipOrLogin()">
+                    <div class="stat-icon-wrap icon-amber">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                    </div>
+                    <div class="stat-number" id="stat-vip">0</div>
+                    <div class="stat-label">ຂໍ້ມູນເຊີງລຶກ (VIP)</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- แถบสลับหมวดหมู่ -->
+    <div class="sub-nav-bar">
+        <div class="sub-nav-inner">
+            <div class="tab-buttons">
+                <button class="tab-btn active" id="tab-datasets" onclick="switchTab('datasets')">
+                    ຊຸດຂໍ້ມູນ ແລະ ຂ່າວສານ
+                </button>
+                <button class="tab-btn" id="tab-agencies" onclick="switchTab('agencies')">
+                    ໜ່ວຍງານ ແລະ ເບີໂທສຸກເສີນ
+                </button>
+            </div>
+            <div id="vip-status-banner" style="font-size:13.5px;"></div>
+        </div>
+    </div>
+
+    <!-- พื้นที่เนื้อหาหลัก -->
+    <main class="main-container">
+        <!-- มุมมองที่ 1: รายการชุดข้อมูล -->
+        <div id="view-datasets">
+            <div class="catalog-header">
+                <div class="catalog-count" id="dataset-count-text">ພົບ 0 ຊຸດຂໍ້ມູນ</div>
+                <div class="sort-box">
+                    <span>ລຽງໂດຍ:</span>
+                    <select id="sort-select" onchange="renderDatasets()">
+                        <option value="newest">ລ່າສຸດກ່ອນ</option>
+                        <option value="oldest">ເກົ່າສຸດກ່ອນ</option>
+                    </select>
+                </div>
+            </div>
+            <div class="dataset-grid" id="dataset-list">
+                <div style="padding:24px; text-align:center; color:var(--text-muted);">ກຳລັງໂຫຼດຊຸດຂໍ້ມູນ...</div>
+            </div>
+        </div>
+
+        <!-- มุมมองที่ 2: หน่วยงานและเบอร์โทรฉุกเฉิน -->
+        <div id="view-agencies" style="display:none;">
+            <div class="info-banner">
+                <span>ລາຍຊື່ໜ່ວຍງານບໍລິການສາທາລະນະ ແລະ ເບີໂທສຸກເສີນສຳລັບປະຊາຊົນ</span>
+            </div>
+            <div class="catalog-header">
+                <div class="catalog-count" id="agency-count-text">ພົບ 0 ໜ່ວຍງານ</div>
+            </div>
+            <div class="tree-container">
+                <div class="tree-parent">ສູນປະສານງານເຫດສຸກເສີນ ແລະ ບໍລິການຊຸມຊົນ</div>
+                <ul class="tree-children" id="agency-tree-list"></ul>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal: เข้าสู่ระบบ / สมัครสมาชิก -->
+    <div class="modal-backdrop" id="auth-modal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 id="auth-modal-title">ເຂົ້າສູ່ລະບົບສະມາຊິກ</h3>
+                <button class="close-modal" onclick="closeModal('auth-modal')">&times;</button>
+            </div>
+            <div id="auth-modal-body"></div>
+        </div>
+    </div>
+
+    <!-- Modal: เติมวันใช้งาน VIP -->
+    <div class="modal-backdrop" id="vip-modal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3>ເຕີມມື້ນຳໃຊ້ຂໍ້ມູນສຳຄັນ (VIP)</h3>
+                <button class="close-modal" onclick="closeModal('vip-modal')">&times;</button>
+            </div>
+            <div class="bank-card">
+                <strong>ບັນຊີຮັບໂອນ:</strong> ທະນາຄານການຄ້າຕ່າງປະເທດລາວ (BCEL)<br>
+                <strong>ເລກບັນຊີ:</strong> 010-12-00-12345678-001<br>
+                <strong>ຊື່ບັນຊີ:</strong> ສູນຂໍ້ມູນຂ່າວສານປະຊາຊົນ
+            </div>
+            <div class="form-group">
+                <label>ເລືອກແພັກເກັດມື້ນຳໃຊ້:</label>
+                <select id="pkg-select" onchange="updatePrice()">
+                    <option value="7" data-price="30000">ແພັກເກັດ 7 ມື້ (30,000 ກີບ)</option>
+                    <option value="30" data-price="100000" selected>ແພັກເກັດ 30 ມື້ (100,000 ກີບ)</option>
+                    <option value="365" data-price="900000">ແພັກເກັດ 365 ມື້ (900,000 ກີບ)</option>
+                </select>
+
+                <label>ລາຍລະອຽດການໂອນ (ວັນທີ / ເວລາ / ເລກອ້າງອີງ):</label>
+                <input type="text" id="transfer-note" placeholder="ຕົວຢ່າງ: ໂອນວັນທີ 20/11 ເວລາ 16:30 ໂມງ">
+
+                <button class="btn-primary-full" onclick="submitPayment()">ແຈ້ງໂອນເງິນເພື່ອເປີດນຳໃຊ້</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allContents = [];
+        let allContacts = [];
+        let currentFilter = 'ALL';
+        let currentUser = null;
+        let currentPrice = 100000;
+
+        function updatePrice() {
+            const sel = document.getElementById('pkg-select');
+            currentPrice = sel.options[sel.selectedIndex].getAttribute('data-price');
+        }
+
+        async function init() {
+            await checkAuth();
+            await loadData();
+        }
+
+        async function checkAuth() {
+            const res = await fetch('/api/me');
+            const data = await res.json();
+            const navArea = document.getElementById('nav-user-area');
+            const vipBanner = document.getElementById('vip-status-banner');
+
+            if (data.loggedIn) {
+                currentUser = data;
+                navArea.innerHTML = `
+      <span style="font-size:13.5px; color:var(--text-secondary);">ສະບາຍດີ, <strong>${data.user.fullname}</strong></span>
+      ${data.user.role === 'admin' ? `<a href="admin.html" class="btn-nav accent">ຈັດການຫຼັງບ້ານ</a>` : ''}
+      <button class="btn-nav primary" onclick="openModal('vip-modal')">ເຕີມມື້ VIP</button>
+      <button class="btn-nav" onclick="logout()">ອອກຈາກລະບົບ</button>
+    `;
+
+                vipBanner.innerHTML = data.isVipActive
+                    ? `<span style="color:#0d9488; font-weight:700;">ສະຖານະ VIP: ນຳໃຊ້ໄດ້ (ຍັງເຫຼືອ ${data.daysLeft} ມື້)</span>`
+                    : `<span style="color:#d97706; font-weight:700;">ສະຖານະ: ສະມາຊິກທົ່ວໄປ</span> <button onclick="openModal('vip-modal')" class="btn-nav primary" style="padding:3px 10px; margin-left:6px;">ສະໝັກ VIP</button>`;
+            } else {
+                currentUser = null;
+                navArea.innerHTML = `<button class="btn-nav primary" onclick="openAuthModal('login')">ເຂົ້າສູ່ລະບົບ</button>`;
+                vipBanner.innerHTML = `<span style="color:var(--text-muted);">ຜູ້ຢ້ຽມຊົມທົ່ວໄປ (ເບິ່ງຂໍ້ມູນສາທາລະນະຟຣີ)</span>`;
+            }
+        }
+
+        async function loadData() {
+            const res = await fetch('/api/public-data');
+            const data = await res.json();
+            allContents = data.contents || [];
+            allContacts = data.contacts || [];
+
+            document.getElementById('stat-contents').textContent = allContents.length.toLocaleString();
+            document.getElementById('stat-agencies').textContent = allContacts.length.toLocaleString();
+            document.getElementById('stat-free').textContent = allContents.filter(c => !c.is_vip).length.toLocaleString();
+            document.getElementById('stat-vip').textContent = allContents.filter(c => c.is_vip).length.toLocaleString();
+
+            renderDatasets();
+            renderAgencies();
+        }
+
+        function renderDatasets() {
+            const keyword = document.getElementById('search-input').value.toLowerCase().trim();
+            const sortOrder = document.getElementById('sort-select').value;
+
+            let filtered = allContents.filter(item => {
+                const matchTag = currentFilter === 'ALL' ||
+                    (currentFilter === 'FREE' && !item.is_vip) ||
+                    (currentFilter === 'VIP' && item.is_vip);
+                const matchText = !keyword ||
+                    item.title.toLowerCase().includes(keyword) ||
+                    item.category.toLowerCase().includes(keyword) ||
+                    item.body.toLowerCase().includes(keyword);
+                return matchTag && matchText;
+            });
+
+            if (sortOrder === 'oldest') filtered = [...filtered].reverse();
+            document.getElementById('dataset-count-text').textContent = `ພົບ ${filtered.length} ຊຸດຂໍ້ມູນ`;
+
+            const listEl = document.getElementById('dataset-list');
+            if (filtered.length === 0) {
+                listEl.innerHTML = `<div style="background:#fff; border:1px solid var(--border); border-radius:12px; padding:32px; text-align:center; color:var(--text-muted);">ບໍ່ພົບຊຸດຂໍ້ມູນທີ່ຄົ້ນຫາ</div>`;
+                return;
+            }
+
+            listEl.innerHTML = filtered.map(item => {
+                const dateStr = item.created_at ? new Date(item.created_at).toLocaleDateString('lo-LA') : '20 ພະຈິກ 2026';
+                return `
+      <div class="dataset-card">
+        <div class="dataset-top">
+          <h4 class="dataset-title">${item.title}</h4>
+          <div class="dataset-tags">
+            <span class="cat-badge ${item.is_vip ? 'badge-amber' : 'badge-mint'}">${item.category}</span>
+            <span class="cat-badge badge-sky">${item.is_vip ? 'ສະມາຊິກ VIP' : 'ສາທາລະນະ'}</span>
+          </div>
+        </div>
+
+        ${item.locked
+                        ? `<div class="vip-lock-alert">
+              <span>${item.body}</span>
+              <button onclick="openVipOrLogin()" class="btn-nav primary">ເປີດສິດ VIP</button>
+             </div>`
+                        : `<p class="dataset-body">${item.body}</p>`}
+
+        <div class="dataset-meta">
+          <span>ວັນທີເຜີຍແຜ່: ${dateStr}</span>
+        </div>
+      </div>
+    `;
+            }).join('');
+        }
+
+        function renderAgencies() {
+            const keyword = document.getElementById('search-input').value.toLowerCase().trim();
+            const filtered = allContacts.filter(c =>
+                !keyword ||
+                c.agency.toLowerCase().includes(keyword) ||
+                c.phone.includes(keyword) ||
+                (c.note && c.note.toLowerCase().includes(keyword))
+            );
+
+            document.getElementById('agency-count-text').textContent = `ພົບ ${filtered.length} ໜ່ວຍງານ`;
+            document.getElementById('agency-tree-list').innerHTML = filtered.map(c => `
+    <li>
+      <div>
+        <span class="agency-name">${c.agency}</span>
+        ${c.note ? `<small style="color:var(--text-muted); margin-left:8px;">(${c.note})</small>` : ''}
+      </div>
+      <a href="tel:${c.phone}" class="agency-phone">${c.phone}</a>
+    </li>
+  `).join('');
+        }
+
+        function handleSearch() {
+            renderDatasets();
+            renderAgencies();
+        }
+
+        function filterByTag(tag, el) {
+            currentFilter = tag;
+            switchTab('datasets');
+            if (el) {
+                document.querySelectorAll('.tag-pill').forEach(p => p.classList.remove('active'));
+                el.classList.add('active');
+            }
+            renderDatasets();
+        }
+
+        function switchTab(tab) {
+            document.getElementById('tab-datasets').classList.toggle('active', tab === 'datasets');
+            document.getElementById('tab-agencies').classList.toggle('active', tab === 'agencies');
+            document.getElementById('view-datasets').style.display = tab === 'datasets' ? 'block' : 'none';
+            document.getElementById('view-agencies').style.display = tab === 'agencies' ? 'block' : 'none';
+        }
+
+        function openVipOrLogin() {
+            if (currentUser && currentUser.loggedIn) openModal('vip-modal');
+            else openAuthModal('login');
+        }
+
+        function openModal(id) { document.getElementById(id).classList.add('open'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+        function openAuthModal(mode) {
+            const title = document.getElementById('auth-modal-title');
+            const body = document.getElementById('auth-modal-body');
+
+            if (mode === 'login') {
+                title.textContent = 'ເຂົ້າສູ່ລະບົບສະມາຊິກ';
+                body.innerHTML = `
+      <div class="form-group">
+        <label>ຊື່ຜູ້ໃຊ້ (Username)</label>
+        <input type="text" id="login-user" placeholder="ປ້ອນຊື່ຜູ້ໃຊ້...">
+        <label>ລະຫັດຜ່ານ</label>
+        <input type="password" id="login-pass" placeholder="ປ້ອນລະຫັດຜ່ານ...">
+        <button class="btn-primary-full" onclick="login()">ເຂົ້າສູ່ລະບົບ</button>
+        <p style="text-align:center; font-size:14px; margin-top:14px;">
+          ຍັງບໍ່ມີບັນຊີ? <a href="#" onclick="openAuthModal('register'); return false;" style="color:var(--primary); font-weight:700;">ລົງທະບຽນສະມາຊິກໃໝ່</a>
+        </p>
+      </div>
+    `;
+            } else {
+                title.textContent = 'ລົງທະບຽນສະມາຊິກໃໝ່';
+                body.innerHTML = `
+      <div class="form-group">
+        <label>ຊື່ ແລະ ນາມສະກຸນ</label>
+        <input type="text" id="reg-name" placeholder="ປ້ອນຊື່ ແລະ ນາມສະກຸນ...">
+        <label>ຕັ້ງຊື່ຜູ້ໃຊ້ (Username)</label>
+        <input type="text" id="reg-user" placeholder="ຕັ້ງຊື່ຜູ້ໃຊ້...">
+        <label>ຕັ້ງລະຫັດຜ່ານ</label>
+        <input type="password" id="reg-pass" placeholder="ຕັ້ງລະຫັດຜ່ານ...">
+        <button class="btn-primary-full" style="background:var(--accent);" onclick="register()">ຢືນຢັນການລົງທະບຽນ</button>
+        <p style="text-align:center; font-size:14px; margin-top:14px;">
+          ມີບັນຊີແລ້ວ? <a href="#" onclick="openAuthModal('login'); return false;" style="color:var(--primary); font-weight:700;">ກັບໄປເຂົ້າສູ່ລະບົບ</a>
+        </p>
+      </div>
+    `;
+            }
+            openModal('auth-modal');
+        }
+
+        async function login() {
+            const username = document.getElementById('login-user').value;
+            const password = document.getElementById('login-pass').value;
+            const res = await fetch('/api/login', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            const data = await res.json();
+            if (data.success) { closeModal('auth-modal'); init(); }
+            else alert(data.error);
+        }
+
+        async function register() {
+            const fullname = document.getElementById('reg-name').value;
+            const username = document.getElementById('reg-user').value;
+            const password = document.getElementById('reg-pass').value;
+            const res = await fetch('/api/register', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fullname, username, password })
+            });
+            const data = await res.json();
+            if (data.success) { alert(data.message); openAuthModal('login'); }
+            else alert(data.error);
+        }
+
+        async function logout() {
+            await fetch('/api/logout', { method: 'POST' });
+            init();
+        }
+
+        async function submitPayment() {
+            const package_days = document.getElementById('pkg-select').value;
+            const transfer_note = document.getElementById('transfer-note').value;
+            if (!transfer_note) return alert('ກະລຸນາລະບຸລາຍລະອຽດການໂອນເງິນ');
+            const res = await fetch('/api/payments', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ package_days, amount: currentPrice, transfer_note })
+            });
+            const data = await res.json();
+            alert(data.message || data.error);
+            if (data.success) { document.getElementById('transfer-note').value = ''; closeModal('vip-modal'); }
+        }
+
+        // ລົງທະບຽນ PWA Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(() => console.log('PWA Service Worker Registered'))
+                    .catch((err) => console.error('SW Error:', err));
+            });
+        }
+
+        // ຈັດການປຸ່ມຕິດຕັ້ງແອັບ (Install Prompt)
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            const installBtn = document.getElementById('btn-install-pwa');
+            if (installBtn) installBtn.style.display = 'inline-flex';
+        });
+
+        async function installPWA() {
+            if (!deferredPrompt) return;
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+                document.getElementById('btn-install-pwa').style.display = 'none';
+            }
+            deferredPrompt = null;
+        }
+
+        init();
+    </script>
+</body>
+
+</html>
